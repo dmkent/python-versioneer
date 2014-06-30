@@ -5,15 +5,10 @@ def git_versions_from_vcs(tag_prefix, root, verbose=False):
     # _version.py hasn't already been rewritten with a short version string,
     # meaning we're inside a checked out source tree.
 
-    if not os.path.exists(os.path.join(root, ".git")):
-        if verbose:
-            print("no .git in %s" % root)
-        return {}
-
     GITS = ["git"]
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
-    stdout = run_command(GITS, ["describe", "--tags", "--dirty", "--always"],
+    stdout = run_command(GITS, ["describe", "--tags", "--dirty", "--always", "--match", tag_prefix + "*"],
                          cwd=root)
     if stdout is None:
         return {}
