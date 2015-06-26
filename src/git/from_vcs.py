@@ -13,14 +13,18 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     # _version.py hasn't already been rewritten with a short version string,
     # meaning we're inside a checked out source tree.
 
-    if not os.path.exists(os.path.join(root, ".git")):
-        if verbose:
-            print("no .git in %s" % root)
-        raise NotThisMethod("no .git directory")
-
     GITS = ["git"]
     if sys.platform == "win32":
         GITS = ["git.cmd", "git.exe"]
+
+    # Check we are in a repository
+    if (not os.path.exists(os.path.join(root, ".git")) and
+        run_command(GITS, ["rev-parse", "--git-dir"]) is None):
+        # Not in a repository
+        if verbose:
+           print("no .git in %s" % root)
+        raise NotThisMethod("no .git directory")
+
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out = run_command(GITS, ["describe", "--tags", "--dirty",
